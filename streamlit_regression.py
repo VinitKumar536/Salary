@@ -5,19 +5,21 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 import pandas as pd
 import pickle
 
-model = tf.keras.models.load_model("model.h5")
+model = tf.keras.models.load_model('reg_model.h5')
 
-with open("scaler.pkl", "rb") as f:
+
+with open('scaler.pkl', 'rb') as f:
     scaler = pickle.load(f)
 
-with open("label_encoder_gender.pkl", "rb") as f:
+with open('label_encoder_gender.pkl', 'rb') as f:
     label_encoder_gender = pickle.load(f)
 
-with open("onehot_encoder_geo.pkl", "rb") as f:
+with open('onehot_encoder_geo.pkl', 'rb') as f:
     onehot_encoder_geo = pickle.load(f)
 
 
 
+st.write("Model input shape:", model.input_shape)
 
 ## streamlit app
 st.title('Estimated Salary Prediction ')
@@ -29,7 +31,6 @@ gender = st.selectbox('Gender', label_encoder_gender.classes_)
 age = st.slider('Age', 18, 92)
 balance = st.number_input('Balance')
 credit_score = st.number_input('Credit Score')
-exited = st.selectbox('Exited',[0,1])
 tenure = st.slider('Tenure', 0, 10)
 num_of_products = st.slider('Number of Products', 1, 4)
 has_cr_card = st.selectbox('Has Credit Card', [0, 1])
@@ -47,7 +48,6 @@ input_data = pd.DataFrame({
     'NumOfProducts': [num_of_products],
     'HasCrCard': [has_cr_card],
     'IsActiveMember': [is_active_member],
-    'Exited': [exited]
 })
 
 # One-hot encode 'Geography'
@@ -61,9 +61,14 @@ input_data = pd.concat([input_data.reset_index(drop=True), geo_encoded_df], axis
 input_data_scaled = scaler.transform(input_data)
 
 
-# Predict churn
+# # # Predict churn
+# prediction = model.predict(input_data_scaled)
+# # prediction_proba = prediction[0][0]
+
+# # st.write(f'Estimated Salary : ${prediction[0][0]:.2f}')
+# salary = scaler.inverse_transform(prediction)[0][0]
+# st.write(f"Estimated Salary: ${salary:.2f}")
 prediction = model.predict(input_data_scaled)
-prediction_proba = prediction[0][0]
+salary = prediction[0][0]
 
-st.write(f'Estimated Salary : ${prediction[0][0]:.2f}')
-
+st.write(f"Estimated Salary: ${salary:.2f}")
